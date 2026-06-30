@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "GitHub Comment Hider",
   "version": "0.1.0",
-  "description": "Multi-select GitHub issue/PR comments and bulk-hide them under a theme (Outdated, Off-topic, Duplicate, Resolved, Spam, Abuse). Adds a jump-to-latest-comment button.",
+  "description": "Multi-select GitHub issue/PR comments and bulk-hide them by theme, with quick navigation to the latest comment.",
   "homepage_url": "https://github.com/jtracey93/github-comment-hider",
   "permissions": ["storage"],
   "host_permissions": ["https://github.com/*"],
