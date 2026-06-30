@@ -1,0 +1,28 @@
+{
+  "name": "github-comment-hider",
+  "version": "0.1.0",
+  "description": "Multi-select GitHub issue/PR comments and bulk-hide them under a theme, with quick navigation to the latest comment.",
+  "private": true,
+  "scripts": {
+    "lint": "node --check src/content.js && node --check popup/popup.js && node --check gen-icons.js",
+    "icons": "node gen-icons.js",
+    "package": "node scripts/package.mjs"
+  },
+  "keywords": [
+    "github",
+    "chrome-extension",
+    "edge-extension",
+    "browser-extension",
+    "manifest-v3"
+  ],
+  "author": "Jack Tracey",
+  "license": "MIT",
+  "homepage": "https://github.com/jtracey93/github-comment-hider#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jtracey93/github-comment-hider.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jtracey93/github-comment-hider/issues"
+  }
+}

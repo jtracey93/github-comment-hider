@@ -1,0 +1,144 @@
+/* GitHub Comment Hider — injected styles */
+
+/* Per-comment selection checkbox */
+.gch-checkbox-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+.gch-checkbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #d29922;
+  margin: 0;
+}
+.gch-box-selected {
+  outline: 2px solid #d29922 !important;
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* Flash highlight when jumping to a comment */
+.gch-flash {
+  animation: gch-flash-anim 1.6s ease-out;
+  border-radius: 6px;
+}
+@keyframes gch-flash-anim {
+  0%   { box-shadow: 0 0 0 3px rgba(210,153,34,0.9); background: rgba(210,153,34,0.12); }
+  100% { box-shadow: 0 0 0 3px rgba(210,153,34,0); background: transparent; }
+}
+
+/* Toolbar */
+.gch-toolbar {
+  position: fixed;
+  top: 72px;
+  right: 16px;
+  z-index: 2147483000;
+  width: 250px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  color: var(--fgColor-default, #1f2328);
+  background: var(--bgColor-default, #ffffff);
+  border: 1px solid var(--borderColor-default, #d0d7de);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  overflow: hidden;
+}
+@media (prefers-color-scheme: dark) {
+  .gch-toolbar { color: #e6edf3; background: #161b22; border-color: #30363d; }
+}
+.gch-toolbar-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  font-weight: 600;
+  cursor: move;
+  background: linear-gradient(180deg, rgba(210,153,34,0.14), rgba(210,153,34,0.04));
+  border-bottom: 1px solid var(--borderColor-default, #d0d7de);
+}
+.gch-toolbar-header .gch-title { flex: 1; }
+.gch-icon-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: inherit;
+  font-size: 13px;
+  line-height: 1;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+.gch-icon-btn:hover { background: rgba(127,127,127,0.18); }
+.gch-toolbar-body { padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+.gch-toolbar.gch-collapsed .gch-toolbar-body { display: none; }
+.gch-row { display: flex; align-items: center; gap: 6px; }
+.gch-row label { white-space: nowrap; }
+.gch-select {
+  flex: 1;
+  padding: 4px 6px;
+  border-radius: 6px;
+  border: 1px solid var(--borderColor-default, #d0d7de);
+  background: var(--bgColor-default, #fff);
+  color: inherit;
+  font-size: 12px;
+}
+@media (prefers-color-scheme: dark) {
+  .gch-select { background: #0d1117; border-color: #30363d; }
+}
+.gch-btn {
+  flex: 1;
+  padding: 5px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--borderColor-default, #d0d7de);
+  background: var(--bgColor-muted, #f6f8fa);
+  color: inherit;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+}
+.gch-btn:hover { background: rgba(127,127,127,0.12); }
+.gch-btn-primary {
+  background: #d29922;
+  border-color: #d29922;
+  color: #1f2328;
+  font-weight: 600;
+}
+.gch-btn-primary:hover { background: #b87f17; }
+.gch-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.gch-count { font-variant-numeric: tabular-nums; }
+.gch-count b { color: #d29922; }
+.gch-status {
+  font-size: 11px;
+  opacity: 0.85;
+  min-height: 14px;
+  word-break: break-word;
+}
+.gch-status.gch-error { color: #cf222e; }
+.gch-diag-btn { font-size: 11px; opacity: 0.8; }
+
+/* In-toolbar navigation section */
+.gch-divider {
+  height: 1px;
+  background: var(--borderColor-default, #d0d7de);
+  opacity: 0.7;
+  margin: 2px 0;
+}
+.gch-section-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.6;
+}
+.gch-nav-group { display: flex; flex-direction: column; gap: 8px; }
+.gch-nav-latest, .gch-nav-top { text-align: center; }
+.gch-nav-latest:hover, .gch-nav-top:hover {
+  background: rgba(210,153,34,0.16);
+  border-color: #d29922;
+}
+@media (prefers-color-scheme: dark) {
+  .gch-divider { background: #30363d; }
+}

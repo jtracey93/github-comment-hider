@@ -1,0 +1,13 @@
+# Build output
+dist/
+*.zip
+
+# Dependencies (none required, but just in case)
+node_modules/
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.log
+.vscode/
+.idea/
