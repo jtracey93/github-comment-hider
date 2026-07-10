@@ -1,11 +1,11 @@
 {
   "manifest_version": 3,
   "name": "GitHub Comment Hider",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Multi-select GitHub issue/PR comments and bulk-hide them by theme, with quick navigation to the latest comment.",
   "homepage_url": "https://github.com/jtracey93/github-comment-hider",
   "permissions": ["storage"],
-  "host_permissions": ["https://github.com/*"],
+  "host_permissions": ["https://github.com/*", "https://*.ghe.com/*"],
   "action": {
     "default_title": "GitHub Comment Hider",
     "default_popup": "popup/popup.html"
@@ -19,7 +19,11 @@
     {
       "matches": [
         "https://github.com/*/issues/*",
-        "https://github.com/*/pull/*"
+        "https://github.com/*/pull/*",
+        "https://github.com/*/projects/*",
+        "https://*.ghe.com/*/issues/*",
+        "https://*.ghe.com/*/pull/*",
+        "https://*.ghe.com/*/projects/*"
       ],
       "js": ["src/content.js"],
       "css": ["src/content.css"],

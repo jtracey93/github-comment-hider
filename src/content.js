@@ -100,7 +100,22 @@
   }
 
   // ---- page / UI detection ----
-  const isIssueOrPR = () => /\/(issues|pull)\/\d+/.test(location.pathname);
+  const isIssueOrPRPath = () => /\/(issues|pull)\/\d+/.test(location.pathname);
+
+  // GitHub Projects boards open an issue/PR in a side pane instead of navigating to
+  // the issue page. The board path stays the same and only the query string changes,
+  // e.g. ?pane=issue&itemId=5227&issue=owner%7Crepo%7C99 (%7C = "|").
+  function projectsPaneIssue() {
+    const p = new URLSearchParams(location.search);
+    if (p.get("pane") !== "issue") return null;
+    return p.get("issue") || p.get("itemId") || "issue";
+  }
+  const isProjectsPaneOpen = () => !!projectsPaneIssue();
+
+  // True whenever there are comments we can act on: a normal issue/PR page, or the
+  // Projects side pane showing an issue/PR.
+  const isIssueContext = () => isIssueOrPRPath() || isProjectsPaneOpen();
+
   const isReactUI = () =>
     !!document.querySelector('react-app[app-name="issues-react"]') ||
     !!document.querySelector('[data-testid="issue-viewer-container"]') ||
@@ -229,9 +244,17 @@
     return menus[menus.length - 1] || null;
   }
 
+  // The Projects side pane can itself be a role="dialog" that wraps the entire issue
+  // (comments included). It must never be mistaken for GitHub's small hide-reason
+  // dialog, so treat any overlay that contains comment boxes as "not a dialog" here.
+  // The real hide-reason dialog only holds a reason picker + confirm button.
+  function wrapsComments(el) {
+    return !!(el && el.querySelector && el.querySelector(REACT_BOX + ", " + CLASSIC_BOX));
+  }
+
   function findVisibleDialog() {
     const sel = 'dialog[open], [role="dialog"], [role="alertdialog"], [data-testid*="dialog" i]';
-    const d = [...document.querySelectorAll(sel)].filter((x) => isVisible(x) && notMine(x));
+    const d = [...document.querySelectorAll(sel)].filter((x) => isVisible(x) && notMine(x) && !wrapsComments(x));
     return d[d.length - 1] || null;
   }
 
@@ -345,7 +368,7 @@
       return await waitForOverlaysClosed();
     }
 
-    warn("no reason control matched for theme", theme.label, "— run 'Capture hide UI (diag)' to share the dialog structure");
+    warn("no reason control matched for theme", theme.label, "— GitHub's hide dialog markup may have changed; enable Diagnostics to inspect it in the console");
     return false;
   }
 
@@ -427,80 +450,6 @@
     refreshComments();
   }
 
-  // Describe a candidate overlay element for diagnostics (excludes our own UI elsewhere).
-  function describeEl(el) {
-    const txt = (el.textContent || "").replace(/\s+/g, " ").trim();
-    let cls = "";
-    try { cls = (el.className && el.className.toString ? el.className.toString() : "").slice(0, 240); } catch {}
-    return {
-      tag: el.tagName.toLowerCase(),
-      role: el.getAttribute("role") || null,
-      testid: el.getAttribute("data-testid") || null,
-      ariaLabel: el.getAttribute("aria-label") || null,
-      cls: cls || null,
-      text: txt.slice(0, 240),
-      selects: [...el.querySelectorAll("select")].filter(notMine).map((s) => ({
-        name: s.name || s.id || null,
-        options: [...s.options].map((o) => ({ value: o.value, text: (o.textContent || "").trim() })),
-      })),
-      radios: [...el.querySelectorAll('input[type="radio"], [role="radio"], [role="menuitemradio"]')].filter((r) => isVisible(r) && notMine(r)).map((r) => ({
-        value: r.value || r.getAttribute("value") || null,
-        label: (r.getAttribute("aria-label") || r.closest("label")?.textContent || r.parentElement?.textContent || "").replace(/\s+/g, " ").trim().slice(0, 60),
-      })),
-      buttons: [...el.querySelectorAll('button, [role="button"], input[type="submit"]')].filter((b) => isVisible(b) && notMine(b)).map((b) => (b.textContent || b.value || "").replace(/\s+/g, " ").trim()).filter(Boolean).slice(0, 12),
-      html: el.outerHTML.slice(0, 6000),
-    };
-  }
-
-  // Find every plausible GitHub overlay/dialog/menu/select that is NOT our own UI.
-  function snapshotOverlays() {
-    const out = [];
-    const seen = new Set();
-    const add = (el) => {
-      if (!el || seen.has(el) || !isVisible(el) || isMine(el)) return;
-      seen.add(el);
-      out.push(describeEl(el));
-    };
-    document.querySelectorAll('dialog[open], [role="dialog"], [role="alertdialog"], [role="menu"], [role="listbox"], [data-testid*="dialog" i], [data-testid*="hide" i], [data-testid*="minimi" i], [class*="Dialog"], [class*="Overlay"], [class*="Popover"]').forEach(add);
-    [...document.querySelectorAll("select")].filter((s) => isVisible(s) && notMine(s)).forEach((s) => add(s.closest('form, [role="dialog"], dialog, [class*="Overlay"], div') || s));
-    [...document.body.children].slice(-10).forEach(add);
-    return out;
-  }
-
-  // Diagnostic: open one comment's menu + Hide, dump the DOM, but DO NOT confirm.
-  async function captureHideUI() {
-    const box = selectedBoxes()[0] || getCommentBoxes().find((b) => !isAlreadyHidden(b));
-    if (!box) { setStatus("No comment available to capture.", true); return; }
-    const kebab = getKebab(box);
-    if (!kebab) { setStatus("No actions button found.", true); return; }
-    setStatus("Capturing hide UI…");
-    pointerClick(kebab);
-    await sleep(120);
-    const menu = await waitFor(() => findOpenMenu(), { timeout: 3000 });
-    const dump = {
-      url: location.href,
-      reactUI: isReactUI(),
-      menuItems: menu ? menuItemsText(menu) : null,
-      menuHTML: menu ? menu.outerHTML.slice(0, 4000) : null,
-    };
-    if (menu) {
-      const hideItem = findMenuItemByText(menu, "hide");
-      dump.hideItemFound = !!hideItem;
-      if (hideItem) {
-        pointerClick(hideItem);
-        // Poll up to ~2.5s for any GitHub overlay/dialog to render after Hide.
-        await waitFor(() => findVisibleDialog() || document.querySelector("dialog[open]") || (findOpenMenu() && findOpenMenu() !== menu), { timeout: 2500 });
-        await sleep(350);
-        dump.overlays = snapshotOverlays();
-      }
-    }
-    console.log("%c[GCH] CAPTURE — copy EVERYTHING below to share:", "color:#d29922;font-weight:bold");
-    console.log(JSON.stringify(dump, null, 2));
-    try { await navigator.clipboard.writeText(JSON.stringify(dump, null, 2)); setStatus("Captured → copied to clipboard + console. Nothing hidden."); }
-    catch { setStatus("Captured → see console (clipboard blocked). Nothing hidden."); }
-    closeAnyOpenOverlays();
-  }
-
   // ---- toolbar UI ----
   let toolbarEl = null;
   function ensureToolbar() {
@@ -539,9 +488,6 @@
             <button class="gch-btn gch-nav-top" style="flex:1" title="Scroll to the top of the issue">↑ Go to top of issue</button>
           </div>
         </div>
-        <div class="gch-row gch-diag-row">
-          <button class="gch-btn gch-diag-btn gch-capture" title="Open one comment's hide dialog and copy its structure to the clipboard, without hiding anything">Capture hide UI (diag)</button>
-        </div>
       </div>`;
     document.body.appendChild(el);
     toolbarEl = el;
@@ -561,11 +507,9 @@
     el.querySelector(".gch-selall").addEventListener("click", () => selectAll(true));
     el.querySelector(".gch-clear").addEventListener("click", () => selectAll(false));
     el.querySelector(".gch-hide").addEventListener("click", hideSelected);
-    el.querySelector(".gch-capture").addEventListener("click", captureHideUI);
     el.querySelector(".gch-nav-latest").addEventListener("click", jumpToLatest);
     el.querySelector(".gch-nav-top").addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
 
-    el.querySelector(".gch-diag-row").style.display = "";
     el.querySelector(".gch-nav-group").style.display = state.floatingNav ? "" : "none";
 
     makeDraggable(el, el.querySelector(".gch-toolbar-header"));
@@ -636,24 +580,35 @@
   function scheduleRefresh() {
     if (scheduled) return;
     scheduled = true;
-    setTimeout(() => { scheduled = false; if (isIssueOrPR()) refreshComments(); }, 350);
+    setTimeout(() => { scheduled = false; if (isIssueContext()) refreshComments(); }, 350);
   }
 
   function init() {
-    if (!isIssueOrPR()) { teardown(); return; }
+    if (!isIssueContext()) { teardown(); return; }
     ensureToolbar();
+    // In the Projects side pane the issue sits on the right, so move the toolbar to
+    // the left to avoid covering the pane and its controls.
+    if (toolbarEl) toolbarEl.classList.toggle("gch-pane-mode", isProjectsPaneOpen());
     refreshComments();
   }
 
   // Re-inject as the React timeline mounts / virtualizes / loads more.
-  const observer = new MutationObserver(() => { if (isIssueOrPR()) scheduleRefresh(); });
+  const observer = new MutationObserver(() => { if (isIssueContext()) scheduleRefresh(); });
   observer.observe(document.documentElement, { childList: true, subtree: true });
 
   // SPA navigation (GitHub uses pushState/Turbo) — re-init on URL change.
-  let lastPath = location.pathname;
+  // Projects opens an issue in a side pane by changing only the query string
+  // (?pane=issue&issue=owner|repo|number&itemId=...), so track those params too, not
+  // just the pathname — otherwise opening/closing/switching panes never re-inits.
+  function navKey() {
+    const p = new URLSearchParams(location.search);
+    return [location.pathname, p.get("pane") || "", p.get("issue") || "", p.get("itemId") || ""].join("|");
+  }
+  let lastNav = navKey();
   function onNav() {
-    if (location.pathname !== lastPath) {
-      lastPath = location.pathname;
+    const key = navKey();
+    if (key !== lastNav) {
+      lastNav = key;
       selectedIds.clear();
       setTimeout(init, 400);
     }
