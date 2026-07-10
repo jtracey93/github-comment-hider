@@ -33,6 +33,7 @@ FEATURES
 • Go to latest comment / Go to top of issue
 • Settings popup: default theme, toggle checkboxes & navigation, diagnostics
 • Works on the new React issues UI and the classic UI
+• Works on GitHub.com and GitHub Enterprise Cloud (*.ghe.com), including issues opened from a Projects board
 
 HOW IT WORKS
 The extension simply drives GitHub's own "hide comment" interface using your existing,
@@ -60,6 +61,10 @@ bulk-hide them under a chosen reason, and quickly navigate the comment thread.
 - **Host permission `https://github.com/*`** — The extension's sole function is to add
   controls to GitHub issue/PR pages and operate GitHub's native hide-comment UI on the
   user's behalf; a content script must run on github.com to do this.
+- **Host permission `https://*.ghe.com/*`** — The same functionality on GitHub Enterprise
+  Cloud with data residency, whose tenants use region-specific `*.ghe.com` hosts (for
+  example `contoso.ghe.com`) instead of github.com; a content script must run there to
+  provide the same features.
 - **Remote code** — None. All code is bundled in the package.
 
 ## Data usage disclosures (Privacy practices tab)
@@ -84,4 +89,4 @@ bulk-hide them under a chosen reason, and quickly navigate the comment thread.
 > listing shows the real hide flow on your own issues.
 
 ## Upload package
-Run `npm run package` → upload `dist/github-comment-hider-v0.1.0.zip`.
+Run `npm run package` → upload `dist/github-comment-hider-v0.2.0.zip`.
