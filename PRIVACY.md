@@ -24,11 +24,14 @@ You can clear this data at any time by removing the extension.
 
 - **`storage` permission** — used solely to save and read the local settings described
   above.
-- **Host access to `https://github.com/*`** — the content script runs only on GitHub
-  issue and pull request pages so it can add the selection checkboxes and toolbar, and
-  drive GitHub's own "hide comment" UI on your behalf. It reads only the page content
-  needed to do this and acts entirely within your existing, already-authenticated
-  GitHub session. It does not read or exfiltrate page content anywhere.
+- **Host access to `https://github.com/*` and `https://*.ghe.com/*`** — the content
+  script runs only on GitHub issue, pull request, and Projects board pages so it can add
+  the selection checkboxes and toolbar, and drive GitHub's own "hide comment" UI on your
+  behalf. The `*.ghe.com` hosts cover GitHub Enterprise Cloud with data residency, whose
+  tenants are served from region-specific `*.ghe.com` domains (for example
+  `contoso.ghe.com`) instead of `github.com`. It reads only the page content needed to do
+  this and acts entirely within your existing, already-authenticated GitHub session. It
+  does not read or exfiltrate page content anywhere.
 
 ## What the extension does NOT do
 
@@ -41,6 +44,9 @@ You can clear this data at any time by removing the extension.
 - `storage`: persist the user's extension preferences locally.
 - `host_permissions: https://github.com/*`: the extension's entire purpose is to
   augment GitHub issue/PR pages; it must run a content script there.
+- `host_permissions: https://*.ghe.com/*`: the same functionality on GitHub Enterprise
+  Cloud with data residency, whose tenants use region-specific `*.ghe.com` hosts (for
+  example `contoso.ghe.com`) instead of `github.com`.
 
 ## Contact
 
