@@ -1,6 +1,6 @@
 {
   "name": "github-comment-hider",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Multi-select GitHub issue/PR comments and bulk-hide them under a theme, with quick navigation to the latest comment.",
   "private": true,
   "scripts": {

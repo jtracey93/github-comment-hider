@@ -41,13 +41,16 @@ no Personal Access Token, and it works with SSO-protected org repos automaticall
 
 - **Permissions:** hiding requires that you can moderate the repo (maintainer/triage).
   The extension only does what you could do by hand.
+- **GitHub Enterprise:** works on `github.com` and on GitHub Enterprise data-residency
+  hosts (any `*.ghe.com` instance, e.g. `msft.ghe.com`).
+- **Project boards:** when you open an issue/PR in the side pane from a GitHub Projects
+  board, the toolbar and checkboxes appear against that pane (docked to the left so they
+  don't cover it).
 - **Very long issues:** GitHub's new issues UI virtualizes the timeline, so only
   comments currently rendered can be selected/hidden. Scroll to load more if needed.
 - **GitHub UI is a moving target.** The hide menu/dialog selectors are resilient
-  (role/text based), but if GitHub changes them the **Capture hide UI (diag)** button
-  (shown when Diagnostics is on) dumps the live menu/dialog structure to the console
-  and clipboard so the selectors can be updated quickly. Enabling **Diagnostics** in
-  the popup also logs each step to the DevTools console (prefix `[GCH]`).
+  (role/text based), but if GitHub changes them, enable **Diagnostics** in the popup to
+  log each step to the DevTools console (prefix `[GCH]`) so the selectors can be updated.
 
 ## Files
 

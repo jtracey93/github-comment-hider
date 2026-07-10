@@ -117,7 +117,13 @@
   word-break: break-word;
 }
 .gch-status.gch-error { color: #cf222e; }
-.gch-diag-btn { font-size: 11px; opacity: 0.8; }
+
+/* When a GitHub Projects issue side pane is open (it slides in from the right),
+   dock the toolbar on the left so it doesn't cover the pane or its close button. */
+.gch-toolbar.gch-pane-mode {
+  right: auto;
+  left: 16px;
+}
 
 /* In-toolbar navigation section */
 .gch-divider {
